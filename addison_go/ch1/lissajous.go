@@ -19,7 +19,13 @@ const (
 )
 
 func main() {
-	f, err := os.Create("a.gif")
+	f, err := os.Create("a_multicolor.gif")
+	pallet = []color.Color{
+		color.Black,
+		color.RGBA{0x00, 0xff, 0x00, 0xff},
+		color.RGBA{0xff, 0x00, 0x00, 0xff},
+		color.RGBA{0x00, 0x00, 0xff, 0xff},
+	}
 	if err != nil {
 		panic(err)
 	}
@@ -42,10 +48,14 @@ func lissajous(out io.Writer) {
 	for i := 0; i < nframes; i++ {
 		rect := image.Rect(0, 0, 2*size+1, 2*size+1)
 		img := image.NewPaletted(rect, pallet)
-		for th := 0.0; th < cycles*2*math.Pi; th += res {
-			x := math.Sin(th)
-			y := math.Sin(th*freq + phase)
-			img.SetColorIndex(size+int(x*size+0.5), size+int(y*size+0.5), blackIndex)
+		th := 0.0
+		for cnx := uint8(1); cnx <= 3; cnx++ {
+			for dth := 0.0; dth < cycles*2*math.Pi/3; dth += res {
+				x := math.Sin(th + dth)
+				y := math.Sin((th+dth)*freq + phase)
+				img.SetColorIndex(size+int(x*size+0.5), size+int(y*size+0.5), cnx)
+			}
+			th += 2 * math.Pi / 3
 		}
 		phase += 0.1
 		anim.Delay = append(anim.Delay, delay)
